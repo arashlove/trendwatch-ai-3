@@ -1,0 +1,15 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.9
+praw>=7.8.0
+python-dotenv>=1.0.0
+pandas>=2.2.0
+numpy>=2.0.0
+scikit-learn>=1.5.0
+nltk>=3.9.0
+vaderSentiment>=3.3.2
+spacy>=3.8.0
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+sentence-transformers>=3.0.0
+openai>=1.50.0
+httpx>=0.27.0
