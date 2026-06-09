@@ -1,5 +1,3 @@
-"""Rule-based information extraction: hashtags, mentions, risk keywords."""
-
 import re
 from typing import TypedDict
 

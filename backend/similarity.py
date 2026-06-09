@@ -1,5 +1,3 @@
-"""Text similarity using embedding cosine similarity."""
-
 from typing import TypedDict
 
 import numpy as np

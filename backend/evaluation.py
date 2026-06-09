@@ -1,5 +1,4 @@
-"""Automated evaluation: metrics and LLM-as-judge stub."""
-
+import json
 import os
 from typing import TypedDict
 
@@ -75,8 +74,6 @@ def llm_judge_briefing(briefing_markdown: str, crisis_score: int) -> JudgeResult
             temperature=0,
             max_tokens=200,
         )
-        import json
-
         text = resp.choices[0].message.content or "{}"
         data = json.loads(text)
         return {

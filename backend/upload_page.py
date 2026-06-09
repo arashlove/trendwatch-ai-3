@@ -1,6 +1,3 @@
-"""HTML upload UI for Devvit → local FastAPI report flow."""
-
-
 def render_upload_page(*, error: str | None = None) -> str:
     err_block = ""
     if error:

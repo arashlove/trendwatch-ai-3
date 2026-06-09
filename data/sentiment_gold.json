@@ -1,0 +1,166 @@
+{
+  "description": "Mini gold-standard sentiment set for TrendWatch AI evaluation. Human labels assigned by reading title + selftext in Reddit context (brand monitoring / general tone). Used to benchmark VADER, weakly supervised LR, and the majority-vote ensemble.",
+  "labeling_protocol": "One annotator (project author). Positive = favourable or promotional tone; negative = criticism, harm, scandal, or reputational risk; neutral = factual, mixed, humorous-without-attack, or sad-but-affectionate memorial.",
+  "posts": [
+    {
+      "id": "ms_stealer",
+      "corpus": "microsoft",
+      "title": "For the 2nd time in weeks, Microsoft packages laced with credential stealer",
+      "selftext": "",
+      "human_label": "negative",
+      "rationale": "Security incident harming users"
+    },
+    {
+      "id": "ms_kill_bing",
+      "corpus": "microsoft",
+      "title": "Microsoft is letting you kill Bing in Windows 11 Search, after years of forcing it on every PC",
+      "selftext": "",
+      "human_label": "neutral",
+      "rationale": "User-empowering product change; 'kill' is headline idiom not brand attack"
+    },
+    {
+      "id": "ms_monopoly",
+      "corpus": "microsoft",
+      "title": "Browser coalition accuses Microsoft of monopolistic abuse and demands change",
+      "selftext": "",
+      "human_label": "negative",
+      "rationale": "Explicit accusation of monopolistic abuse"
+    },
+    {
+      "id": "ms_killing_dialogs",
+      "corpus": "microsoft",
+      "title": "Microsoft is killing every ancient Windows 11 dialog box, and it's about time",
+      "selftext": "",
+      "human_label": "neutral",
+      "rationale": "UX improvement framed positively; 'killing' is metaphor"
+    },
+    {
+      "id": "ms_linux",
+      "corpus": "microsoft",
+      "title": "Microsoft continues its big Linux push at Build 2026",
+      "selftext": "",
+      "human_label": "positive",
+      "rationale": "Favourable developer-ecosystem news"
+    },
+    {
+      "id": "ms_surface",
+      "corpus": "microsoft",
+      "title": "The Nvidia RTX Spark Era Starts Here: Hands On With Microsoft's Surface Laptop Ultra",
+      "selftext": "",
+      "human_label": "positive",
+      "rationale": "Product hands-on / launch coverage"
+    },
+    {
+      "id": "ms_quantum",
+      "corpus": "microsoft",
+      "title": "Microsoft claims new quantum chip 1,000 times better than before",
+      "selftext": "",
+      "human_label": "positive",
+      "rationale": "Breakthrough announcement tone"
+    },
+    {
+      "id": "ms_addicted",
+      "corpus": "microsoft",
+      "title": "Microsoft Wants to 'Make People Addicted' to its New AI Assistant, Internal Documents Reveal",
+      "selftext": "",
+      "human_label": "negative",
+      "rationale": "Ethical criticism of product strategy"
+    },
+    {
+      "id": "ms_zero_day",
+      "corpus": "microsoft",
+      "title": "Researcher Drops a New VS Code Zero-Day After Losing Trust in Microsoft's Disclosure Process",
+      "selftext": "",
+      "human_label": "negative",
+      "rationale": "Security disclosure failure"
+    },
+    {
+      "id": "ms_ai_expensive",
+      "corpus": "microsoft",
+      "title": "Microsoft data suggests using AI is more expensive than hiring people",
+      "selftext": "",
+      "human_label": "negative",
+      "rationale": "Unfavourable economic implication for Microsoft AI narrative"
+    },
+    {
+      "id": "ms_password",
+      "corpus": "microsoft",
+      "title": "Microsoft is ditching password-based authentication tomorrow – Edge browser will switch to Windows Hello access",
+      "selftext": "",
+      "human_label": "positive",
+      "rationale": "Security improvement for users"
+    },
+    {
+      "id": "ms_office_mac",
+      "corpus": "microsoft",
+      "title": "Microsoft Office 2019 for Mac will no longer edit documents after July 13",
+      "selftext": "",
+      "human_label": "neutral",
+      "rationale": "Factual product lifecycle notice"
+    },
+    {
+      "id": "dog_silly",
+      "corpus": "dog",
+      "title": "Silly dog",
+      "selftext": "",
+      "human_label": "positive",
+      "rationale": "Light-hearted pet post"
+    },
+    {
+      "id": "dog_lucky",
+      "corpus": "dog",
+      "title": "I don't know how I got so lucky with my dog!",
+      "selftext": "I also don't know how in the world she was able to take a selfie by herself lol (she put her paws on my phone at the perfect time)",
+      "human_label": "positive",
+      "rationale": "Affectionate owner post"
+    },
+    {
+      "id": "dog_abuse",
+      "corpus": "dog",
+      "title": "my neighbor is abusing his dog",
+      "selftext": "i've called the police and they've come to his door, then left.\n\n20 minutes later i hear the dog being abused again. what other routes can i take?\n\ni'm calling my apt manager early morning tuesday.\n\n",
+      "human_label": "negative",
+      "rationale": "Animal cruelty / distress"
+    },
+    {
+      "id": "dog_died",
+      "corpus": "dog",
+      "title": "Recent video of me and my dog of 17 years who died this morning. he will always have a place in our hearts",
+      "selftext": "",
+      "human_label": "neutral",
+      "rationale": "Sad memorial but affectionate, not hostile"
+    },
+    {
+      "id": "dog_kill_you",
+      "corpus": "dog",
+      "title": "That doesn't sound like a dog.…… nobody will kill you….",
+      "selftext": "",
+      "human_label": "neutral",
+      "rationale": "Humorous video context; 'kill' not a threat"
+    },
+    {
+      "id": "dog_starla",
+      "corpus": "dog",
+      "title": "Vote for Starla as Cutest Dog! ✨💗",
+      "selftext": "",
+      "human_label": "positive",
+      "rationale": "Contest promotion"
+    },
+    {
+      "id": "dog_humanity",
+      "corpus": "dog",
+      "title": "Humanity Still Breathes on Our Streets",
+      "selftext": "This morning near Margaret School, Siliguri, I saw street dogs given rags to sit on and stay warm. Such a small act, yet so powerful. I sincerely thank whoever took this thoughtful step. These voiceless souls endure far more than we ever will, and moments like this remind us that compassion still exists. Humanity lives on, quietly, through actions like these.",
+      "human_label": "positive",
+      "rationale": "Compassionate / uplifting story"
+    },
+    {
+      "id": "dog_die",
+      "corpus": "dog",
+      "title": "Love dogs as you love your self ❤, Don't leave them to die 🐾😭🙏",
+      "selftext": "",
+      "human_label": "neutral",
+      "rationale": "Awareness appeal; not directed criticism"
+    }
+  ]
+}

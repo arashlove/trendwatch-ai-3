@@ -1,5 +1,3 @@
-"""Reddit data collection via PRAW or public JSON API (optional standalone use)."""
-
 import os
 
 import httpx
@@ -69,7 +67,6 @@ def search_reddit_public(
     time_filter: str = "month",
     sort: str = "relevance",
 ) -> list[dict]:
-    """Fetch posts via Reddit's public .json search (no API keys required)."""
     user_agent = os.getenv("REDDIT_USER_AGENT", "trendwatch-ai/1.0")
     headers = {"User-Agent": user_agent}
     t = TIME_FILTER_MAP.get(time_filter.lower(), "month")
@@ -127,7 +124,6 @@ def search_reddit(
     time_filter: str = "month",
     sort: str = "relevance",
 ) -> list[dict]:
-    """Optional Reddit fetch for standalone /analyze and /demo (not used by Devvit hybrid)."""
     client_id = os.getenv("REDDIT_CLIENT_ID", "").strip()
     client_secret = os.getenv("REDDIT_CLIENT_SECRET", "").strip()
     user_agent = os.getenv("REDDIT_USER_AGENT", "trendwatch-ai/1.0")

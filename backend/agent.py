@@ -1,6 +1,9 @@
-"""Agentic orchestration (ReAct-style): plan → act → observe steps."""
-
 from typing import Callable, TypedDict
+
+from crisis import high_impact_posts
+from extraction import aggregate_risk_keywords
+from sentiment import sentiment_distribution
+from similarity import top_similar_pairs
 
 
 class AgentStep(TypedDict):
@@ -70,11 +73,7 @@ def run_analysis_agent(
     step("Retrieve relevant posts for grounded LLM briefing (RAG).", "rag", f"Query={query}")
     rag_context = rag_fn(posts, query)
 
-    from extraction import aggregate_risk_keywords
-    from sentiment import sentiment_distribution
-
     dist = sentiment_distribution(posts)
-    from crisis import high_impact_posts
 
     payload = {
         "query": query,
@@ -97,8 +96,6 @@ def run_analysis_agent(
     briefing = briefing_fn(payload)
     payload["briefing"] = briefing
     payload["llm_report"] = briefing.get("raw_markdown", "")
-
-    from similarity import top_similar_pairs
 
     payload["similar_pairs"] = top_similar_pairs(posts)
 

@@ -1,4 +1,3 @@
-# Start TrendWatch Python API using the project venv (not conda).
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 

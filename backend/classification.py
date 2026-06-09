@@ -1,5 +1,3 @@
-"""Traditional text classification: TF-IDF + Logistic Regression."""
-
 from typing import Literal
 
 import numpy as np
@@ -8,11 +6,8 @@ from sklearn.linear_model import LogisticRegression
 
 SentimentLabel = Literal["positive", "neutral", "negative"]
 
-_vader_lexicon: dict[str, float] | None = None
-
 
 def _weak_labels(texts: list[str]) -> list[SentimentLabel]:
-    """Weak supervision from VADER for training when no gold labels exist."""
     from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
     analyzer = SentimentIntensityAnalyzer()

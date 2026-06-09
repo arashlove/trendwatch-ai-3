@@ -1,5 +1,3 @@
-"""Render full assignment-style HTML report from analyze pipeline output."""
-
 from __future__ import annotations
 
 import html

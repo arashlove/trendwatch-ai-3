@@ -1,6 +1,6 @@
 import './index.css';
 
-import { lazy, StrictMode, Suspense, useState } from 'react';
+import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { TrendWatchSearchParams } from '../shared/types';
 import {
@@ -8,22 +8,13 @@ import {
   DEFAULT_SCAN_LIMIT,
 } from '../shared/types';
 import { BackendStatus } from './components/BackendStatus';
-import { CrisisPanel } from './components/CrisisPanel';
 import { DataSourceBanner } from './components/DataSourceBanner';
-import { HighImpactPosts } from './components/HighImpactPosts';
-import { InsightReport } from './components/InsightReport';
-import { OverviewCards } from './components/OverviewCards';
+import { FilteredPostsPanel } from './components/FilteredPostsPanel';
+import { KeywordFilterPanel } from './components/KeywordFilterPanel';
+import { KeywordFrequencyChart } from './components/KeywordFrequencyChart';
 import { ReportExportPanel } from './components/ReportExportPanel';
 import { SearchPanel } from './components/SearchPanel';
 import { TopKeywordsPanel } from './components/TopKeywordsPanel';
-import { TopicCards } from './components/TopicCards';
-
-const SentimentChart = lazy(() =>
-  import('./components/SentimentChart').then((m) => ({ default: m.SentimentChart }))
-);
-const TrendTimeline = lazy(() =>
-  import('./components/TrendTimeline').then((m) => ({ default: m.TrendTimeline }))
-);
 import {
   buildReportRequest,
   copyReportDataToClipboard,
@@ -35,18 +26,20 @@ import { useTrendWatch } from './hooks/useTrendWatch';
 export const App = () => {
   const { health } = useBackendHealth();
   const {
-    collectData,
-    analyzeData,
-    collecting,
-    analysing,
-    collectError,
-    analyzeError,
-    collect,
-    analyze,
+    discoverData,
+    filterData,
+    reportData,
+    discovering,
+    filtering,
+    discoverError,
+    filterError,
+    discover,
+    filterByKeyword,
   } = useTrendWatch();
 
   const [reporting, setReporting] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [filterKeyword, setFilterKeyword] = useState('');
   const [reportExport, setReportExport] = useState<{
     json: string;
     copiedToClipboard: boolean;
@@ -59,31 +52,28 @@ export const App = () => {
     limit: DEFAULT_POST_LIMIT,
   });
 
-  const normalizedParams = (): TrendWatchSearchParams => ({
+  const baseParams = (): TrendWatchSearchParams => ({
     ...params,
-    query: params.query.trim(),
+    query: '',
     subreddit: params.subreddit.trim().replace(/^r\//i, '') || 'all',
   });
 
-  const handleCollect = () => {
+  const handleDiscover = () => {
     setReportExport(null);
-    void collect(normalizedParams());
+    setFilterKeyword('');
+    void discover(baseParams());
   };
 
-  const handleAnalyze = () => {
-    void analyze(normalizedParams());
+  const handleFilter = () => {
+    setReportExport(null);
+    void filterByKeyword(baseParams(), filterKeyword);
   };
 
-  const canAnalyze =
-    collectData !== null &&
-    (collectData.posts_matched > 0 || collectData.posts.length > 0);
-
-  const canFullReport =
-    collectData !== null &&
-    collectData.export_posts.length >= 5;
+  const canCopyReport =
+    reportData !== null && reportData.export_posts.length >= 5;
 
   const handleCopyReport = () => {
-    if (!collectData) {
+    if (!reportData) {
       return;
     }
     setReporting(true);
@@ -92,9 +82,9 @@ export const App = () => {
     void (async () => {
       try {
         const payload = buildReportRequest(
-          collectData.query,
-          collectData.subreddit,
-          collectData.export_posts
+          reportData.query,
+          reportData.subreddit,
+          reportData.export_posts
         );
         const result = await copyReportDataToClipboard(payload);
         setReportExport(result);
@@ -118,62 +108,66 @@ export const App = () => {
         <SearchPanel
           params={params}
           onChange={setParams}
-          onCollect={handleCollect}
-          onAnalyze={handleAnalyze}
-          onCopyReport={handleCopyReport}
-          reportUploadUrl={reportUploadUrl()}
-          collecting={collecting}
-          analysing={analysing}
-          reporting={reporting}
-          canAnalyze={canAnalyze}
-          canCopyReport={canFullReport}
+          onCollect={handleDiscover}
+          collecting={discovering}
         />
 
-        {collectError ? (
-          <p className="text-sm text-red-600 dark:text-red-400">{collectError}</p>
+        {discoverError ? (
+          <p className="text-sm text-red-600 dark:text-red-400">{discoverError}</p>
         ) : null}
-        {analyzeError ? (
-          <p className="text-sm text-red-600 dark:text-red-400">{analyzeError}</p>
+        {filterError ? (
+          <p className="text-sm text-red-600 dark:text-red-400">{filterError}</p>
         ) : null}
         {reportError ? (
           <p className="text-sm text-red-600 dark:text-red-400">{reportError}</p>
         ) : null}
+
+        {discoverData ? (
+          <>
+            <DataSourceBanner data={discoverData} />
+            <TopKeywordsPanel
+              keywords={discoverData.top_keywords}
+              onKeywordSelect={setFilterKeyword}
+              selectedKeyword={filterKeyword}
+            />
+            <KeywordFrequencyChart keywords={discoverData.top_keywords} />
+
+            <KeywordFilterPanel
+              keyword={filterKeyword}
+              onKeywordChange={setFilterKeyword}
+              onFilter={handleFilter}
+              onCopyReport={handleCopyReport}
+              reportUploadUrl={reportUploadUrl()}
+              filtering={filtering}
+              reporting={reporting}
+              canFilter={discoverData !== null}
+              canCopyReport={canCopyReport}
+              {...(filterData
+                ? {
+                    filterQuery: filterData.query,
+                    postsMatched: filterData.posts_matched,
+                  }
+                : {})}
+            />
+
+            {filterData ? (
+              <>
+                <DataSourceBanner data={filterData} />
+                <FilteredPostsPanel
+                  query={filterData.query}
+                  posts={filterData.posts}
+                />
+              </>
+            ) : null}
+          </>
+        ) : null}
+
         {reportExport ? (
           <ReportExportPanel
             uploadUrl={reportUploadUrl()}
             json={reportExport.json}
             copiedToClipboard={reportExport.copiedToClipboard}
           />
-        ) : null}
-
-        {collectData ? (
-          <>
-            <DataSourceBanner data={collectData} />
-            <TopKeywordsPanel keywords={collectData.top_keywords} />
-          </>
-        ) : null}
-
-        {analyzeData ? (
-          <div className="space-y-4">
-            <OverviewCards summary={analyzeData.summary} />
-            <Suspense
-              fallback={
-                <p className="text-sm text-gray-500 dark:text-gray-400">Loading charts…</p>
-              }
-            >
-              <div className="grid gap-4 lg:grid-cols-2">
-                <SentimentChart distribution={analyzeData.sentiment_distribution} />
-                <CrisisPanel crisis={analyzeData.crisis} />
-              </div>
-              <TrendTimeline trends={analyzeData.trends} />
-            </Suspense>
-            <TopicCards topics={analyzeData.topics} />
-            <HighImpactPosts posts={analyzeData.high_impact_posts} />
-            <InsightReport
-              briefing={analyzeData.briefing}
-              techniques={analyzeData.techniques_used}
-            />
-          </div>
         ) : null}
       </div>
     </div>

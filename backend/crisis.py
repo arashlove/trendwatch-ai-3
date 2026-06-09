@@ -1,5 +1,4 @@
-"""Crisis intelligence score (0–100)."""
-
+import math
 from typing import TypedDict
 
 from trends import TrendSummary
@@ -15,8 +14,6 @@ class CrisisResult(TypedDict):
 def _impact_score(post: dict) -> float:
     score = post.get("score", 0) or 0
     comments = post.get("num_comments", 0) or 0
-    import math
-
     return math.log1p(score) + math.log1p(comments)
 
 

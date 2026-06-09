@@ -1,5 +1,3 @@
-"""Named Entity Recognition and Part-of-Speech tagging."""
-
 from typing import TypedDict
 
 _nlp = None
@@ -7,7 +5,6 @@ _spacy_load_attempted = False
 
 
 def _load_spacy():
-    """Load spaCy model if pre-installed. Never download during HTTP requests."""
     global _nlp, _spacy_load_attempted
     if _spacy_load_attempted:
         return _nlp

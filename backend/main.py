@@ -1,5 +1,3 @@
-"""TrendWatch AI — FastAPI NLP backend."""
-
 import json
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
@@ -52,10 +50,6 @@ def _report_html(body: ReportRequest) -> str:
 
 
 @app.get("/", response_class=HTMLResponse)
-def home():
-    return HTMLResponse(render_upload_page())
-
-
 @app.get("/upload", response_class=HTMLResponse)
 def upload_form():
     return HTMLResponse(render_upload_page())
@@ -76,7 +70,6 @@ async def upload_report(
     file: UploadFile | None = File(None),
     paste_json: str | None = Form(None),
 ):
-    """Accept pasted or uploaded JSON from Devvit Step 3."""
     raw: bytes | None = None
     if file is not None and file.filename:
         raw = await file.read()
@@ -116,7 +109,6 @@ async def upload_report(
 
 @app.post("/report", response_class=HTMLResponse)
 def report(body: ReportRequest):
-    """Programmatic JSON POST (local tools only — not usable from reddit.com)."""
     try:
         html = _report_html(body)
         return HTMLResponse(html)
@@ -159,7 +151,6 @@ def demo(
     limit: int = Query(40, ge=10, le=100),
     time_filter: str = "month",
 ):
-    """Standalone HTML report (fetches Reddit directly — requires API keys or public API)."""
     try:
         result = run_full_analysis(
             query, subreddit=subreddit, limit=limit, time_filter=time_filter

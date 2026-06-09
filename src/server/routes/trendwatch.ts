@@ -50,7 +50,7 @@ trendwatch.get('/health', (c) => {
   const response: BackendHealthResponse = {
     connected: true,
     mode: 'embedded',
-    message: 'Devvit NLP + live Reddit',
+    message: 'Live Reddit keyword collection',
     checked_at: new Date().toISOString(),
   };
   return c.json(response);

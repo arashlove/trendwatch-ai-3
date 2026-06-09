@@ -1,5 +1,3 @@
-"""LLM report generation with CoT prompting, RAG context, and rule-based fallback."""
-
 import os
 from typing import TypedDict
 

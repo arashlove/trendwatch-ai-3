@@ -1,7 +1,6 @@
-"""Full NLP analysis pipeline entry."""
-
 from agent import run_analysis_agent
 from crisis import calculate_crisis_score
+from evaluation import llm_judge_briefing, sentiment_agreement
 from extraction import enrich_posts
 from llm_report import generate_briefing
 from ner_pos import enrich_posts_with_ner
@@ -41,7 +40,6 @@ def _format_analysis_response(
 ) -> dict:
     dist = sentiment_distribution(result["posts"])
     crisis = result["crisis"]
-    from evaluation import llm_judge_briefing, sentiment_agreement
 
     return {
         "query": query,
@@ -129,7 +127,6 @@ def run_analysis_on_posts(
     query: str,
     subreddit: str = "all",
 ) -> dict:
-    """Run full NLP on posts supplied by the Devvit app (no Reddit fetch)."""
     if len(posts) < 5:
         raise ValueError("Need at least 5 posts for analysis")
 

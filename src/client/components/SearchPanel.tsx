@@ -12,14 +12,7 @@ type SearchPanelProps = {
   params: TrendWatchSearchParams;
   onChange: (params: TrendWatchSearchParams) => void;
   onCollect: () => void;
-  onAnalyze: () => void;
-  onCopyReport?: () => void;
-  reportUploadUrl?: string;
   collecting: boolean;
-  analysing: boolean;
-  reporting?: boolean;
-  canAnalyze: boolean;
-  canCopyReport?: boolean;
 };
 
 const inputClass =
@@ -35,39 +28,17 @@ export const SearchPanel = ({
   params,
   onChange,
   onCollect,
-  onAnalyze,
-  onCopyReport,
-  reportUploadUrl,
   collecting,
-  analysing,
-  reporting = false,
-  canAnalyze,
-  canCopyReport = false,
 }: SearchPanelProps) => (
   <section className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
     <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
       TrendWatch
     </h1>
     <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-      Step 1 collects keywords from live Reddit. Step 2 runs a lightweight in-app preview.
-      Step 3 copies JSON for the full Python NLP report on your PC.
+      Step 1 scans all recent posts in the subreddit (no keyword filter). Step 2 filters by a
+      keyword; Step 3 copies data for the full Python NLP report.
     </p>
-    <div className="grid gap-4 sm:grid-cols-2">
-      <div>
-        <label className={labelClass} htmlFor="tw-query">
-          Keyword
-        </label>
-        <input
-          id="tw-query"
-          className={inputClass}
-          value={params.query}
-          onChange={(e) => onChange({ ...params, query: e.target.value })}
-          placeholder="Optional — leave blank for all posts"
-        />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Filter posts before extracting keywords
-        </p>
-      </div>
+    <div className="grid gap-4 sm:grid-cols-3">
       <div>
         <label className={labelClass} htmlFor="tw-subreddit">
           Subreddit
@@ -96,7 +67,7 @@ export const SearchPanel = ({
           }
         />
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Recent posts to fetch ({MIN_SCAN_LIMIT}–{MAX_SCAN_LIMIT})
+          Recent posts ({MIN_SCAN_LIMIT}–{MAX_SCAN_LIMIT})
         </p>
       </div>
       <div>
@@ -115,7 +86,7 @@ export const SearchPanel = ({
           }
         />
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Matched posts to analyze ({MIN_POST_LIMIT}–{MAX_POST_LIMIT})
+          Max posts ({MIN_POST_LIMIT}–{MAX_POST_LIMIT})
         </p>
       </div>
     </div>
@@ -125,47 +96,14 @@ export const SearchPanel = ({
         <button
           className="rounded bg-[#d93900] dark:bg-orange-600 px-4 py-2 text-sm text-white disabled:opacity-50"
           onClick={onCollect}
-          disabled={collecting || analysing || reporting}
+          disabled={collecting}
         >
           {collecting ? 'Finding keywords…' : 'Find keywords'}
         </button>
         <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[11rem]">
-          Collect posts and top 10 keywords
+          All posts in subreddit — top 10 keywords
         </p>
       </div>
-      <div className="flex flex-col gap-1">
-        <span className={stepLabelClass}>Step 2</span>
-        <button
-          className="rounded border border-[#d93900] dark:border-orange-600 px-4 py-2 text-sm text-[#d93900] dark:text-orange-400 disabled:opacity-50"
-          onClick={onAnalyze}
-          disabled={!canAnalyze || collecting || analysing || reporting}
-        >
-          {analysing ? 'Running analysis…' : 'Run analysis'}
-        </button>
-        <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[11rem]">
-          Lightweight charts and preview briefing
-        </p>
-      </div>
-      {onCopyReport ? (
-        <div className="flex flex-col gap-1">
-          <span className={stepLabelClass}>Step 3</span>
-          <button
-            className="rounded border border-gray-400 dark:border-gray-500 px-4 py-2 text-sm text-gray-800 dark:text-gray-200 disabled:opacity-50"
-            onClick={onCopyReport}
-            disabled={!canCopyReport || collecting || analysing || reporting}
-          >
-            {reporting ? 'Copying…' : 'Copy report data'}
-          </button>
-          <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[12rem]">
-            Paste at{' '}
-            {reportUploadUrl ? (
-              <span className="break-all">{reportUploadUrl}</span>
-            ) : (
-              'localhost:8000/upload'
-            )}
-          </p>
-        </div>
-      ) : null}
     </div>
   </section>
 );

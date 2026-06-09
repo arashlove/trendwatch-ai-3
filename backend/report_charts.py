@@ -1,5 +1,3 @@
-"""Matplotlib charts embedded as base64 PNG in the HTML assignment report."""
-
 from __future__ import annotations
 
 import base64
@@ -132,7 +130,6 @@ def chart_crisis_score(result: dict[str, Any]) -> str:
         gridspec_kw={"width_ratios": [1, 1.35], "wspace": 0.5},
     )
 
-    # --- Speedometer gauge (compact, hub at baseline) ---
     ax_gauge.set_aspect("equal")
     ax_gauge.set_xlim(-1.1, 1.1)
     ax_gauge.set_ylim(-0.42, 0.95)
@@ -190,10 +187,9 @@ def chart_crisis_score(result: dict[str, Any]) -> str:
     )
 
     ax_gauge.text(0, 0.88, "Crisis score", ha="center", fontsize=11, fontweight="bold", color="#334155")
-    ax_gauge.text(0, -0.1, str(score), ha="center", fontsize=26, fontweight="bold", color=accent)
-    ax_gauge.text(0, -0.3, f"/ 100  ·  {level} risk", ha="center", fontsize=9, color="#64748b")
+    ax_gauge.text(0, -0.14, str(score), ha="center", fontsize=26, fontweight="bold", color=accent)
+    ax_gauge.text(0, -0.34, f"/ 100  ·  {level} risk", ha="center", fontsize=9, color="#64748b")
 
-    # --- Component bars (sorted, thicker, fixed x-scale) ---
     items = sorted(
         [(k.replace("_", " ").title(), float(v)) for k, v in components.items()],
         key=lambda x: x[1],
@@ -486,7 +482,6 @@ def chart_agent_pipeline(agent: dict[str, Any]) -> str:
 
 
 def generate_all_charts(result: dict[str, Any]) -> dict[str, str]:
-    """Build chart images keyed by section id."""
     posts = result.get("posts", [])
     posts_by_id: dict[str, dict] = {}
     for p in posts:

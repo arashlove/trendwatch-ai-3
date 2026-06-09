@@ -1,5 +1,3 @@
-"""Retrieval-Augmented Generation: retrieve relevant posts for LLM context."""
-
 from typing import TypedDict
 
 import numpy as np

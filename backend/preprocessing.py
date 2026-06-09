@@ -1,5 +1,3 @@
-"""Text preprocessing: tokenization, normalization, stemming, lemmatization."""
-
 import re
 from typing import TypedDict
 

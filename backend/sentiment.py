@@ -1,5 +1,3 @@
-"""Sentiment analysis: VADER + TF-IDF Logistic Regression ensemble."""
-
 from typing import Literal, TypedDict
 
 from classification import SentimentClassifier

@@ -1,5 +1,3 @@
-"""Topic detection: sentence embeddings + KMeans (TF-IDF fallback)."""
-
 from collections import Counter
 from typing import TypedDict
 
