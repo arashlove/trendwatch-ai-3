@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import quote
 
+from report_charts import chart_img, generate_all_charts
+
 SOURCE_LABELS = {
     "reddit_praw": "Live Reddit (PRAW API credentials)",
     "reddit_public_api": "Live Reddit (public search API)",
@@ -234,6 +236,8 @@ def render_demo_report(
         "Critical": "risk-crit",
     }.get(str(s.get("risk_level", "")), "")
 
+    charts = generate_all_charts(result)
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -343,7 +347,27 @@ def render_demo_report(
     .topic-card h4 {{ margin: 0 0 0.35rem; font-size: 0.95rem; }}
     .muted {{ color: var(--muted); font-size: 0.88rem; }}
     .two-col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }}
-    @media (max-width: 700px) {{ .two-col {{ grid-template-columns: 1fr; }} }}
+    @media (max-width: 700px) {{ .two-col, .chart-grid {{ grid-template-columns: 1fr; }} }}
+    .chart-grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }}
+    .chart-full {{ grid-column: 1 / -1; }}
+    .chart-img {{
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }}
+    .chart-caption {{
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }}
     .toolbar {{
       position: sticky;
       top: 0;
@@ -433,6 +457,11 @@ def render_demo_report(
 
     <section id="crisis" class="card">
       <h2>2. Crisis intelligence layer</h2>
+      <div class="chart-grid">
+        <div class="chart-full">
+          {chart_img(charts["crisis"], alt="Crisis score gauge and component breakdown")}
+        </div>
+      </div>
       <p class="crisis-big {risk_class}">
         {_esc(s.get("crisis_score", 0))}/100 — {_esc(s.get("risk_level", ""))} risk
       </p>
@@ -451,6 +480,16 @@ def render_demo_report(
         <div class="metric"><div class="val">{pcts.get("neutral", 0)}%</div><div class="lbl">Neutral</div></div>
         <div class="metric"><div class="val">{pcts.get("negative", 0)}%</div><div class="lbl">Negative</div></div>
       </div>
+      <div class="chart-grid">
+        <div>
+          {chart_img(charts["overview_sentiment"], alt="Sentiment distribution donut chart")}
+          <p class="chart-caption">Final labels after VADER + LR ensemble majority vote.</p>
+        </div>
+        <div>
+          {chart_img(charts["overview_classifiers"], alt="VADER vs logistic regression comparison")}
+          <p class="chart-caption">Independent classifier outputs before ensemble fusion.</p>
+        </div>
+      </div>
       <h3>Sentiment distribution (VADER + LR ensemble)</h3>
       {_pct_bar("Positive", pcts.get("positive", 0), "pos")}
       {_pct_bar("Neutral", pcts.get("neutral", 0), "neu")}
@@ -463,6 +502,12 @@ def render_demo_report(
 
     <section id="trends" class="card">
       <h2>4. Trend detection</h2>
+      <div class="chart-grid">
+        <div class="chart-full">
+          {chart_img(charts["trends"], alt="Trend timeline chart")}
+          <p class="chart-caption">Daily post volume (bars), negative sentiment % (line), and risk keyword counts (dashed).</p>
+        </div>
+      </div>
       <p><strong>Spike detected:</strong> {"Yes" if trends.get("spike_detected") else "No"}
         — {_esc(trends.get("spike_message", ""))}</p>
       <p><strong>Average negative ratio:</strong> {float(trends.get("avg_negative_ratio", 0)) * 100:.1f}%</p>
@@ -474,16 +519,39 @@ def render_demo_report(
 
     <section id="topics" class="card">
       <h2>5. Topic clusters (embeddings + KMeans)</h2>
+      <div class="chart-grid">
+        <div class="chart-full">
+          {chart_img(charts["topics"], alt="Topic cluster sizes chart")}
+        </div>
+      </div>
       {topic_blocks if topic_blocks else "<p><em>Not enough posts for clustering.</em></p>"}
     </section>
 
     <section id="entities" class="card">
       <h2>6. Named entities (NER)</h2>
+      <div class="chart-grid">
+        <div class="chart-full">
+          {chart_img(charts["entities"], alt="Top named entities chart")}
+        </div>
+      </div>
       {_table(["Entity", "Mentions"], entity_rows)}
     </section>
 
     <section id="risk" class="card">
       <h2>7. Risk keywords & high-impact posts</h2>
+      <div class="chart-grid">
+        <div>
+          {chart_img(charts["risk_keywords"], alt="Risk keyword frequency chart")}
+        </div>
+        <div>
+          {chart_img(charts["similarity"], alt="Similar post pairs chart")}
+        </div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-full">
+          {chart_img(charts["high_impact"], alt="High impact posts chart")}
+        </div>
+      </div>
       <div class="two-col">
         <div>
           <h3>Risk keyword frequency</h3>
@@ -527,6 +595,14 @@ def render_demo_report(
 
     <section id="agent" class="card">
       <h2>10. Agent orchestration & evaluation</h2>
+      <div class="chart-grid">
+        <div>
+          {chart_img(charts["agent"], alt="Agent pipeline trace chart")}
+        </div>
+        <div>
+          {chart_img(charts["evaluation"], alt="Evaluation metrics chart")}
+        </div>
+      </div>
       <p><strong>Agent status:</strong> {_esc(agent.get("status", ""))}</p>
       <h3>ReAct-style trace</h3>
       {_table(["Step", "Thought", "Action", "Observation"], trace_rows)}
@@ -545,8 +621,8 @@ def render_demo_report(
         <li>Public Reddit text only; no private user data.</li>
         <li>Crisis scores are decision-support estimates, not legal or PR advice.</li>
         <li>Sentiment models can misclassify sarcasm and domain-specific language.</li>
-        <li>For quantitative evaluation on labelled data, run <code>python report/run_evaluation.py</code>.</li>
-        <li>Written report skeleton: <code>report/output/REPORT_DRAFT.md</code></li>
+        <li>For quantitative evaluation on labelled data, extend <code>backend/evaluation.py</code>.</li>
+        <li>Full NLP technique reference: <code>docs/NLP_TECHNIQUES.md</code></li>
       </ul>
       <p class="muted">
         TrendWatch AI · Devvit Web + Python FastAPI ·

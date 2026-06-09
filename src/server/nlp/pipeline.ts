@@ -100,8 +100,8 @@ export const runPipeline = async (
         'TF-IDF + Logistic Regression ensemble',
         'Sentence embeddings (MiniLM) topic clustering',
         'RAG-grounded LLM briefing',
-        'ReAct agent trace and printable HTML report',
-        'Runs in local Python/Flask service (separate tab)',
+        'ReAct agent trace and printable HTML report with Matplotlib charts',
+        'Runs in local Python FastAPI service (paste at /upload)',
       ],
     },
   };
