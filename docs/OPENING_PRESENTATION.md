@@ -13,7 +13,7 @@
 |---|--------------------------|-----------------------------------|
 | **Purpose** | End-to-end brand monitoring on live Reddit | Offline NLP experiments & benchmarks |
 | **Data** | Live posts via Devvit API | Kaggle / curated Reddit CSV |
-| **UI** | Reddit iframe + HTML report | Dashboard / notebook / Streamlit |
+| **UI** | Reddit iframe + HTML report | Dashboard |
 | **Output** | Crisis score, briefing, printable report | Accuracy, F1, model comparison tables |
 | **Role in assignment** | Primary implementation demo | Evidence for technique selection & evaluation |
 
