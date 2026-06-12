@@ -713,16 +713,9 @@ def render_demo_report(
     </section>
 
     <section id="techniques" class="card">
-      <h2>9. NLP techniques demonstrated (rubric)</h2>
-      <div class="technique-intro">
-        <p><strong>All techniques below are implemented and executed in one pipeline run</strong>
-        (<code>agent.py</code> → <code>pipeline.py</code>). This report used
-        <strong>{_esc(briefing_source_note)}</strong> for §1.
-        Advanced layers (RAG, ReAct trace, evaluation) are detailed in §10; ethics in §11.</p>
-        <p class="muted">Run <code>backend/benchmark_sentiment.py</code> on
-        <code>data/sentiment_gold.json</code> for human gold-set Accuracy / Precision / Recall / F1.</p>
-      </div>
-      <p>Minimum <strong>3 basic + 3 advanced</strong> — we demonstrate
+      <h2>9. NLP techniques demonstrated</h2>
+      
+      <p>Minimum <strong>3 basic + 3 advanced</strong>, we demonstrate
         <strong>{len(basic)} basic</strong> and <strong>{len(advanced)} advanced</strong>
         with module mapping for audit and reproduction.</p>
       <div class="two-col">
