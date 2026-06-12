@@ -82,8 +82,27 @@ def chat_completion(
     if extra:
         kwargs["extra_body"] = extra
 
+    provider = get_provider_label()
+    model = get_model()
+    print(
+        f"[TrendWatch LLM] Calling {provider} — model={model} "
+        f"base_url={get_base_url()} max_tokens={max_tokens}",
+        flush=True,
+    )
+
     resp = client.chat.completions.create(**kwargs)
     content = resp.choices[0].message.content
     if not content:
         raise ValueError("LLM returned empty content")
+
+    usage = getattr(resp, "usage", None)
+    if usage:
+        print(
+            f"[TrendWatch LLM] {provider} response OK — "
+            f"prompt_tokens={usage.prompt_tokens} completion_tokens={usage.completion_tokens}",
+            flush=True,
+        )
+    else:
+        print(f"[TrendWatch LLM] {provider} response OK", flush=True)
+
     return content
