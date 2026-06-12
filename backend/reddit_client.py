@@ -1,9 +1,7 @@
 import os
 
+import env_config  # noqa: F401
 import httpx
-from dotenv import load_dotenv
-
-load_dotenv()
 
 _last_data_source = "unknown"
 

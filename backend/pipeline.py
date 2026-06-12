@@ -84,6 +84,7 @@ def _format_analysis_response(
                 "sentiment_ensemble",
                 "embedding_clustering",
                 "regex_extraction",
+                "temporal_trends",
             ],
             "advanced": [
                 "foundation_llm",

@@ -26,6 +26,7 @@ TECHNIQUE_LABELS = {
     "sentiment_ensemble": "Sentiment ensemble (VADER + LR majority vote)",
     "embedding_clustering": "Embedding-based topic clustering (KMeans)",
     "regex_extraction": "Regex information extraction (hashtags, mentions, risk lexicon)",
+    "temporal_trends": "Temporal trend analysis (daily volume & negative ratio)",
     "foundation_llm": "Foundation LLM (OpenAI-compatible briefing)",
     "rag": "Retrieval-augmented generation (top-k posts)",
     "prompt_engineering": "Prompt engineering (structured analyst template)",
@@ -36,11 +37,113 @@ TECHNIQUE_LABELS = {
     "ethics_disclaimer": "Ethics & fairness disclaimers",
 }
 
+TECHNIQUE_META: dict[str, dict[str, str]] = {
+    "preprocessing": {
+        "module": "preprocessing.py",
+        "detail": "Merges title and selftext, removes URLs/HTML, lowercases, tokenizes with NLTK, then stems (Porter) and lemmatizes (WordNet). Output field: clean_text.",
+        "section": "All downstream sections",
+    },
+    "ner": {
+        "module": "ner_pos.py",
+        "detail": "spaCy en_core_web_sm extracts ORG/PRODUCT/DATE entities; NLTK ne_chunk fallback if spaCy is unavailable. Corpus-level entity counts in §6.",
+        "section": "§6 Named entities",
+    },
+    "pos_tagging": {
+        "module": "ner_pos.py",
+        "detail": "POS tags per token (spaCy or NLTK) stored on each post for linguistic analysis alongside NER.",
+        "section": "§6 (with entities)",
+    },
+    "tfidf_logistic_regression": {
+        "module": "classification.py",
+        "detail": "TF-IDF (1–2 grams, max 5000 features) + Logistic Regression trained with weak VADER labels on the current corpus. Produces lr_label per post.",
+        "section": "§3 Classifier comparison chart",
+    },
+    "sentiment_ensemble": {
+        "module": "sentiment.py",
+        "detail": "VADER compound thresholds combined with LR via majority vote; VADER+LR disagreement resolves to neutral. Final label drives crisis and trends.",
+        "section": "§3 Sentiment donut + classifier bars",
+    },
+    "embedding_clustering": {
+        "module": "topics.py, similarity.py",
+        "detail": "Sentence-BERT MiniLM embeddings (TF-IDF fallback) clustered with KMeans; cluster labels from top keywords. Also powers semantic similarity pairs in §7.",
+        "section": "§5 Topic clusters",
+    },
+    "regex_extraction": {
+        "module": "extraction.py",
+        "detail": "Regex pulls #hashtags, u/mentions, and ~30-term risk lexicon (exploit, lawsuit, boycott, …). Counts feed crisis scoring and §7 tables.",
+        "section": "§7 Risk keywords",
+    },
+    "temporal_trends": {
+        "module": "trends.py",
+        "detail": "Aggregates posts by day: volume, negative ratio, risk-keyword count. Detects sentiment spikes vs corpus average for crisis component.",
+        "section": "§4 Trend timeline",
+    },
+    "foundation_llm": {
+        "module": "llm_report.py",
+        "detail": "OpenAI-compatible chat API generates structured markdown briefing (Executive Summary, Concerns, Actions). Active when OPENAI_API_KEY is set.",
+        "section": "§1 Executive briefing",
+    },
+    "rag": {
+        "module": "rag.py",
+        "detail": "Embeds post clean_text + query; cosine top-k retrieval supplies evidence snippets to the briefing prompt so outputs stay grounded in real posts.",
+        "section": "§1 (context for briefing)",
+    },
+    "prompt_engineering": {
+        "module": "llm_report.py",
+        "detail": "Fixed analyst system prompt and markdown section template (## Executive Summary, ## Main Concerns, …) constrain LLM output format.",
+        "section": "§1 briefing structure",
+    },
+    "chain_of_thought": {
+        "module": "llm_report.py",
+        "detail": "System prompt instructs step-by-step reasoning on sentiment, topics, and risk before the structured briefing sections are written.",
+        "section": "§1 (LLM path)",
+    },
+    "llm_as_judge": {
+        "module": "evaluation.py, benchmark_sentiment.py",
+        "detail": "Optional LLM scores briefing clarity 0–100; heuristic judge without API key. Gold-set benchmark (data/sentiment_gold.json) reports Accuracy/P/R/F1 for VADER, LR, ensemble.",
+        "section": "§10 Evaluation charts",
+    },
+    "ensemble_methods": {
+        "module": "sentiment.py, crisis.py",
+        "detail": "Two ensembles: (1) VADER+LR sentiment vote; (2) crisis score fuses negative %, risk keywords, high-engagement negatives, and trend spike (max 40+25+20+15 pts).",
+        "section": "§2 Crisis gauge + §3 sentiment",
+    },
+    "agentic_react": {
+        "module": "agent.py, pipeline.py",
+        "detail": "ReAct-style loop logs thought → action → observation for collect, preprocess, extract, NER, sentiment, topics, trends, crisis, RAG, briefing. See trace table below.",
+        "section": "§10 Agent trace (F19)",
+    },
+    "ethics_disclaimer": {
+        "module": "llm_report.py, demo_report.py",
+        "detail": "ETHICS_FOOTER appended to every briefing; §11 states public-data-only use, decision-support limits, and model bias caveats.",
+        "section": "§11 Ethics",
+    },
+}
+
 
 def _esc(value: Any) -> str:
     if value is None:
         return ""
     return html.escape(str(value))
+
+
+def _technique_list(keys: list[str]) -> str:
+    items: list[str] = []
+    for key in keys:
+        label = TECHNIQUE_LABELS.get(key, key.replace("_", " "))
+        meta = TECHNIQUE_META.get(key, {})
+        module = meta.get("module", "—")
+        detail = meta.get("detail", "")
+        section = meta.get("section", "")
+        items.append(
+            f'<li class="technique-item">'
+            f"<strong>{_esc(label)}</strong>"
+            f'<code class="technique-module">{_esc(module)}</code>'
+            f'<p class="muted">{_esc(detail)}</p>'
+            f'<p class="technique-ref">Output: {_esc(section)}</p>'
+            f"</li>"
+        )
+    return "".join(items)
 
 
 def _pct_bar(label: str, pct: float, color: str) -> str:
@@ -205,13 +308,19 @@ def render_demo_report(
 
     basic = techniques.get("basic", [])
     advanced = techniques.get("advanced", [])
-    basic_list = "".join(
-        f"<li><strong>{_esc(TECHNIQUE_LABELS.get(t, t))}</strong></li>" for t in basic
-    )
-    advanced_list = "".join(
-        f"<li><strong>{_esc(TECHNIQUE_LABELS.get(t, t))}</strong></li>"
-        for t in advanced
-    )
+    if "temporal_trends" not in basic:
+        basic = [*basic, "temporal_trends"]
+    basic_list = _technique_list(basic)
+    advanced_list = _technique_list(advanced)
+    briefing_source = briefing.get("source", "unknown")
+    if briefing_source == "llm_cot":
+        briefing_source_note = "LLM-generated (OpenAI API — RAG + chain-of-thought)"
+    elif briefing_source == "llm_error_fallback":
+        briefing_source_note = (
+            f"Rule-based fallback — OpenAI call failed: {briefing.get('llm_error', 'unknown error')}"
+        )
+    else:
+        briefing_source_note = "Rule-based fallback (set OPENAI_API_KEY in backend/.env for LLM briefing)"
 
     steps = agent.get("steps", [])
     trace_rows = [
@@ -345,6 +454,32 @@ def render_demo_report(
     .topic-card h4 {{ margin: 0 0 0.35rem; font-size: 0.95rem; }}
     .muted {{ color: var(--muted); font-size: 0.88rem; }}
     .two-col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }}
+    .technique-list {{ list-style: none; padding: 0; margin: 0; }}
+    .technique-item {{
+      list-style: none;
+      margin: 0 0 1rem;
+      padding: 0.75rem 0.9rem;
+      background: var(--bg);
+      border-radius: 6px;
+      border-left: 3px solid var(--brand);
+    }}
+    .technique-item strong {{ display: block; margin-bottom: 0.25rem; }}
+    .technique-module {{
+      font-size: 0.78rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }}
+    .technique-ref {{ font-size: 0.8rem; color: var(--brand); margin: 0.35rem 0 0; }}
+    .technique-intro {{
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }}
     @media (max-width: 700px) {{ .two-col, .chart-grid {{ grid-template-columns: 1fr; }} }}
     .chart-grid {{
       display: grid;
@@ -438,7 +573,8 @@ def render_demo_report(
 
     <section id="briefing" class="card">
       <h2>1. Executive briefing</h2>
-      <p class="muted">Source: {_esc(briefing.get("source", "unknown"))} · RAG + CoT LLM or rule-based fallback</p>
+      <p class="muted">Source: <strong>{_esc(briefing.get("source", "unknown"))}</strong> · {_esc(briefing_source_note)}</p>
+      {f'<p class="muted" style="color:#b91c1c">LLM error: {_esc(briefing.get("llm_error", ""))}</p>' if briefing.get("llm_error") else ""}
       <h3>Executive summary</h3>
       <p>{_esc(briefing.get("executive_summary", ""))}</p>
       <h3>Main concerns</h3>
@@ -578,15 +714,25 @@ def render_demo_report(
 
     <section id="techniques" class="card">
       <h2>9. NLP techniques demonstrated (rubric)</h2>
-      <p>Minimum <strong>3 basic + 3 advanced</strong> techniques — implementation mapping for your written report.</p>
+      <div class="technique-intro">
+        <p><strong>All techniques below are implemented and executed in one pipeline run</strong>
+        (<code>agent.py</code> → <code>pipeline.py</code>). This report used
+        <strong>{_esc(briefing_source_note)}</strong> for §1.
+        Advanced layers (RAG, ReAct trace, evaluation) are detailed in §10; ethics in §11.</p>
+        <p class="muted">Run <code>backend/benchmark_sentiment.py</code> on
+        <code>data/sentiment_gold.json</code> for human gold-set Accuracy / Precision / Recall / F1.</p>
+      </div>
+      <p>Minimum <strong>3 basic + 3 advanced</strong> — we demonstrate
+        <strong>{len(basic)} basic</strong> and <strong>{len(advanced)} advanced</strong>
+        with module mapping for audit and reproduction.</p>
       <div class="two-col">
         <div>
           <h3>Basic techniques</h3>
-          <ul>{basic_list}</ul>
+          <ul class="technique-list">{basic_list}</ul>
         </div>
         <div>
           <h3>Advanced techniques</h3>
-          <ul>{advanced_list}</ul>
+          <ul class="technique-list">{advanced_list}</ul>
         </div>
       </div>
     </section>
@@ -619,7 +765,8 @@ def render_demo_report(
         <li>Public Reddit text only; no private user data.</li>
         <li>Crisis scores are decision-support estimates, not legal or PR advice.</li>
         <li>Sentiment models can misclassify sarcasm and domain-specific language.</li>
-        <li>For quantitative evaluation on labelled data, extend <code>backend/evaluation.py</code>.</li>
+        <li>Gold-set benchmark: <code>backend/benchmark_sentiment.py</code> +
+        <code>data/sentiment_gold.json</code> (20 labelled posts).</li>
         <li>Full NLP technique reference: <code>docs/NLP_TECHNIQUES.md</code></li>
       </ul>
       <p class="muted">

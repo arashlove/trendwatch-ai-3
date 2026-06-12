@@ -1,3 +1,5 @@
+import env_config  # noqa: F401 — load backend/.env before other modules
+
 import json
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
@@ -57,7 +59,18 @@ def upload_form():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    from llm_client import get_api_key, get_model, get_provider_label, is_openrouter
+
+    key = get_api_key()
+    return {
+        "status": "ok",
+        "llm_configured": bool(key),
+        "llm_provider": get_provider_label() if key else None,
+        "openrouter": is_openrouter() if key else False,
+        "llm_model": get_model() if key else None,
+        "openai_configured": bool(key),
+        "openai_model": get_model() if key else None,
+    }
 
 
 def _parse_report_bytes(raw: bytes) -> ReportRequest:

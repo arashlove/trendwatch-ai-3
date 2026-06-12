@@ -29,7 +29,7 @@ The Reddit iframe cannot call `localhost`, so the JSON copy/paste step is intent
 - **Node.js 22+**
 - **Python 3.10+**
 - Reddit developer account ([Devvit CLI](https://developers.reddit.com/))
-- Optional: `OPENAI_API_KEY` for LLM briefing (rule-based fallback works without it)
+- Optional: LLM in `backend/.env` — **OpenAI direct** or **OpenRouter** (free models); fallback works without any key
 - Optional: Reddit API credentials in `backend/.env` for standalone `/analyze` and `/demo` routes
 
 ## Running the app
@@ -51,6 +51,33 @@ Open the Reddit playtest URL from the CLI. In the expanded view:
 3. **Copy report data** — export matched posts as JSON to the clipboard
 
 ### 2. Python backend (full NLP report)
+
+Create `backend/.env` from the example (for LLM briefing).
+
+**OpenRouter (recommended if OpenAI quota is empty):**
+
+```env
+OPENAI_API_KEY=sk-or-your-openrouter-key
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_MODEL=openai/gpt-oss-120b:free
+```
+
+**OpenAI direct:**
+
+```env
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o-mini
+```
+
+```powershell
+cd backend
+copy .env.example .env
+# edit .env, then:
+.\run.ps1
+```
+
+Verify: **http://127.0.0.1:8000/health** → `llm_configured: true`, `llm_provider: "openrouter"` or `"openai"`.
 
 ```powershell
 cd backend

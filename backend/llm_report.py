@@ -1,9 +1,10 @@
+import logging
 import os
 from typing import TypedDict
 
-from dotenv import load_dotenv
+import env_config  # noqa: F401
 
-load_dotenv()
+logger = logging.getLogger(__name__)
 
 ETHICS_FOOTER = (
     "\n\n---\n*Ethics notice: Analysis uses public Reddit text. Sentiment and crisis "
@@ -12,7 +13,7 @@ ETHICS_FOOTER = (
 )
 
 
-class BriefingSections(TypedDict):
+class BriefingSections(TypedDict, total=False):
     executive_summary: str
     main_concerns: list[str]
     crisis_explanation: str
@@ -20,6 +21,8 @@ class BriefingSections(TypedDict):
     communication_strategy: str
     ethics_notice: str
     source: str
+    llm_error: str
+    raw_markdown: str
 
 
 def _format_context(payload: dict) -> str:
@@ -78,18 +81,12 @@ def _fallback_briefing(payload: dict) -> BriefingSections:
     }
 
 
-def _call_llm(context: str) -> str | None:
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        return None
-    try:
-        from openai import OpenAI
+def _call_llm(context: str) -> tuple[str | None, str | None]:
+    from llm_client import chat_completion, get_api_key, get_provider_label
 
-        client = OpenAI(
-            api_key=api_key,
-            base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-        )
-        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    if not get_api_key():
+        return None, "OPENAI_API_KEY or OPENROUTER_API_KEY not set in backend/.env"
+    try:
         prompt = f"""{COT_SYSTEM}
 
 DATA:
@@ -111,18 +108,17 @@ After your internal reasoning, respond in this exact markdown structure:
 ## Communication Strategy
 (short paragraph)
 """
-        resp = client.chat.completions.create(
-            model=model,
+        content = chat_completion(
             messages=[
                 {"role": "system", "content": COT_SYSTEM},
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.3,
             max_tokens=900,
         )
-        return resp.choices[0].message.content
-    except Exception:
-        return None
+        return content, None
+    except Exception as exc:
+        logger.warning("%s briefing failed: %s", get_provider_label(), exc)
+        return None, str(exc)
 
 
 def _parse_llm_markdown(text: str) -> BriefingSections:
@@ -168,12 +164,17 @@ def _parse_llm_markdown(text: str) -> BriefingSections:
 
 def generate_briefing(payload: dict) -> BriefingSections:
     context = _format_context(payload)
-    raw = _call_llm(context)
+    raw, llm_error = _call_llm(context)
     if raw:
         parsed = _parse_llm_markdown(raw)
         parsed["raw_markdown"] = raw + ETHICS_FOOTER
         return parsed
     fallback = _fallback_briefing(payload)
+    from llm_client import get_api_key
+
+    if llm_error and get_api_key():
+        fallback["source"] = "llm_error_fallback"
+        fallback["llm_error"] = llm_error
     fallback["raw_markdown"] = (
         f"## Executive Summary\n{fallback['executive_summary']}\n\n"
         f"## Main Concerns\n"
