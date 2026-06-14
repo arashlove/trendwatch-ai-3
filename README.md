@@ -149,17 +149,6 @@ cd backend
 | `GET /analyze` | JSON analysis (fetches Reddit directly; needs API keys or public API) |
 | `GET /demo` | HTML report from Reddit fetch |
 
-## Documentation
-
-| Document | Contents |
-|----------|----------|
-| [`docs/OPENING_PRESENTATION.md`](docs/OPENING_PRESENTATION.md) | Intro presentation |
-| [`docs/VIDEO_SCRIPT_4MIN.md`](docs/VIDEO_SCRIPT_4MIN.md) | 4-minute demo script |
-| [`docs/FULL_ASSIGNMENT_REPORT.md`](docs/FULL_ASSIGNMENT_REPORT.md) | Written report outline + case studies |
-| [`docs/NLP_TECHNIQUES.md`](docs/NLP_TECHNIQUES.md) | NLP techniques reference |
-| [`docs/CHARTS_AND_FIGURES.md`](docs/CHARTS_AND_FIGURES.md) | Report figures (F1–F20) |
-| [`AGENTS.md`](AGENTS.md) | Devvit web development rules |
-
 ## Project layout
 
 ```text
@@ -167,7 +156,7 @@ src/client/     React UI (game.html — expanded dashboard)
 src/server/     Devvit API routes (/api/trendwatch/collect, …)
 backend/        FastAPI NLP pipeline + HTML report
 data/           Exported JSON corpora, gold labels, PDF reports
-docs/           Assignment report, video script, presentation
+docs/           Opening presentation (`OPENING_PRESENTATION.md`)
 ```
 
 ## License
